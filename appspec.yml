@@ -4,7 +4,7 @@ files:
   - source: ./app-directory/app/metabase.jar
     destination: /var/lib/analytic-app/
   - source: analytic-app-setup
-  - destination: /etc/init.d/
+    destination: /etc/init.d/
 
 hooks:
   BeforeInstall:
