@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: ./app-directory/app/metabase.jar
+  - source: metabase.jar
     destination: /var/lib/analytic-app/
   - source: analytic-app-setup
     destination: /etc/init.d/
