@@ -1,0 +1,80 @@
+#!/bin/bash
+
+BASE_DIR=/var/lib/analytic-app
+LOG_DIR=/var/log/analytic-app
+JVM_ARGS="-XX:+UseG1GC -Xloggc:$LOG_DIR/gc.log -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=10m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=$LOG_DIR/heapdump.txt"
+START_COMMAND="java $JVM_ARGS -jar $BASE_DIR/metabase.jar"
+PID_FILE=$BASE_DIR/analytic-app.pid
+
+start() {
+  PID=`$START_COMMAND > $LOG_DIR/init.log 2>$LOG_DIR/init.error.log & echo $!`
+}
+
+case "$1" in
+start)
+    if [ ! -d $LOG_DIR ]; then
+        mkdir $LOG_DIR
+    fi
+    if [ -f $PID_FILE ]; then
+        PID=`cat $PID_FILE`
+        if [ -z "`ps axf | grep ${PID} | grep -v grep`" ]; then
+            start
+        else
+            echo "Already running [$PID]"
+            exit 0
+        fi
+    else
+        start
+    fi
+
+    if [ -z $PID ]; then
+        echo "Failed starting"
+        exit 1
+    else
+        echo $PID > $PID_FILE
+        echo "Started [$PID]"
+        exit 0
+    fi
+;;
+status)
+    if [ -f $PID_FILE ]; then
+        PID=`cat $PID_FILE`
+        if [ -z "`ps axf | grep ${PID} | grep -v grep`" ]; then
+            echo "Not running (process dead but PID file exists)"
+            exit 0
+        else
+            echo "Running [$PID]"
+            exit 0
+        fi
+    else
+        echo "Not running"
+        exit 0
+    fi
+;;
+stop)
+    if [ -f $PID_FILE ]; then
+        PID=`cat $PID_FILE`
+        if [ -z "`ps axf | grep ${PID} | grep -v grep`" ]; then
+            echo "Not running (process dead but PID file exists)"
+            rm -f $PID_FILE
+            exit 0
+        else
+            PID=`cat $PID_FILE`
+            kill -term $PID
+            echo "Stopped [$PID]"
+            rm -f $PID_FILE
+            exit 0
+        fi
+    else
+        echo "Not running (PID not found)"
+        exit 0
+    fi
+;;
+restart)
+    $0 stop
+    $0 start
+;;
+*)
+    echo "Usage: $0 {status|start|stop|restart}"
+    exit 0
+esac

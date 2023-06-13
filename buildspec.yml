@@ -1,0 +1,18 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Installing Docker..."
+  build:
+    commands:
+      - echo "Building Docker image and running containers..."
+      - DOCKER_BUILDKIT=1 docker build --output type=local,dest=app-directory .
+  
+artifacts:
+  files:
+    - ./app-directory/app/metabase.jar
+    - appspec.yml
+    - scripts/*
+  discard-paths: yes
+

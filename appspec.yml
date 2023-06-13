@@ -2,4 +2,24 @@ version: 0.0
 os: linux
 files:
   - source: ./app-directory/app/metabase.jar
-    destination: /tmp
+    destination: /var/lib/analytic-app/
+  - source: analytic-app-setup
+  - destination: /etc/init.d/
+
+hooks:
+  BeforeInstall:
+    - location: cleanup.sh
+      timeout: 300
+      runas: root
+  AfterInstall:
+    - location: post_install.sh
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: start_server.sh
+      timeout: 300
+      runas: root
+  ApplicationStop:
+    - location: stop_server.sh
+      timeout: 300
+      runas: root
