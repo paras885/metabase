@@ -2,8 +2,7 @@
 
 BASE_DIR=/var/lib/analytic-app
 LOG_DIR=/var/log/analytic-app
-JVM_ARGS="-XX:+UseG1GC -Xloggc:$LOG_DIR/gc.log -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=10m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=$LOG_DIR/heapdump.txt"
-START_COMMAND="java $JVM_ARGS -jar $BASE_DIR/metabase.jar"
+START_COMMAND="java -jar $BASE_DIR/metabase.jar"
 PID_FILE=$BASE_DIR/analytic-app.pid
 
 start() {
