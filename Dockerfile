@@ -19,6 +19,8 @@ RUN curl -s "https://get.sdkman.io" | bash
 # Install Java 8 using SDKMAN
 RUN /bin/bash -c "source $HOME/.sdkman/bin/sdkman-init.sh; sdk install java 8.0.302-open"
 
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+
 COPY . .
 
 # version is pulled from git, but git doesn't trust the directory due to different owners
@@ -30,7 +32,7 @@ RUN INTERACTIVE=false CI=true MB_EDITION=$MB_EDITION bin/build.sh
 # # STAGE 2: runner
 # ###################
 
-FROM --platform=linux/amd64 eclipse-temurin:11-jre-alpine as runner
+FROM --platform=linux/amd64 adoptopenjdk:8-jre-hotspot as runner
 
 ENV FC_LANG en-US LC_CTYPE en_US.UTF-8
 
