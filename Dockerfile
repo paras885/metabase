@@ -8,7 +8,7 @@ ARG MB_EDITION=oss
 
 WORKDIR /home/node
 
-RUN apt-get update && apt-get upgrade -y && apt-get install openjdk-11-jdk curl git -y \
+RUN apt-get update && apt-get upgrade -y && apt-get install openjdk-8-jdk curl git -y \
     && curl -O https://download.clojure.org/install/linux-install-1.11.1.1262.sh \
     && chmod +x linux-install-1.11.1.1262.sh \
     && ./linux-install-1.11.1.1262.sh
@@ -20,15 +20,11 @@ RUN git config --global --add safe.directory /home/node
 
 RUN INTERACTIVE=false CI=true MB_EDITION=$MB_EDITION bin/build.sh
 
-# ###################
-# # STAGE 2: runner
-# ###################
+###################
+# STAGE 2: runner
+###################
 
-## Remember that this runner image needs to be the same as bin/docker/Dockerfile with the exception that this one grabs the
-## jar from the previous stage rather than the local build
-## we're not yet there to provide an ARM runner till https://github.com/adoptium/adoptium/issues/96 is ready
-
-FROM --platform=linux/amd64 eclipse-temurin:11-jre-alpine as runner
+FROM --platform=linux/amd64 eclipse-temurin:8-jre-alpine as runner
 
 ENV FC_LANG en-US LC_CTYPE en_US.UTF-8
 
