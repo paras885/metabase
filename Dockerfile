@@ -8,10 +8,18 @@ ARG MB_EDITION=oss
 
 WORKDIR /home/node
 
-RUN apt-get update && apt-get upgrade -y && apt-get install openjdk-8-jdk curl git -y \
+RUN apt-get update && apt-get upgrade -y && apt-get install curl git -y \
     && curl -O https://download.clojure.org/install/linux-install-1.11.1.1262.sh \
     && chmod +x linux-install-1.11.1.1262.sh \
     && ./linux-install-1.11.1.1262.sh
+
+# Install OpenJDK 8 from AdoptOpenJDK
+RUN curl -L -O https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u292-b10/OpenJDK8U-jdk_x64_linux_hotspot_8u292b10.tar.gz \
+    && tar xzf OpenJDK8U-jdk_x64_linux_hotspot_8u292b10.tar.gz -C /opt \
+    && rm OpenJDK8U-jdk_x64_linux_hotspot_8u292b10.tar.gz
+
+# Set JAVA_HOME environment variable
+ENV JAVA_HOME=/opt/jdk8u292-b10
 
 COPY . .
 
@@ -20,23 +28,21 @@ RUN git config --global --add safe.directory /home/node
 
 RUN INTERACTIVE=false CI=true MB_EDITION=$MB_EDITION bin/build.sh
 
-###################
-# STAGE 2: runner
-###################
+# ###################
+# # STAGE 2: runner
+# ###################
 
-FROM --platform=linux/amd64 eclipse-temurin:8-jre-alpine as runner
+FROM adoptopenjdk:8-jre-hotspot as runner
 
 ENV FC_LANG en-US LC_CTYPE en_US.UTF-8
 
 # dependencies
-RUN apk add -U bash ttf-dejavu fontconfig curl java-cacerts && \
-    apk upgrade && \
-    rm -rf /var/cache/apk/* && \
+RUN apt-get update && apt-get install -y fontconfig curl && \
     mkdir -p /app/certs && \
     curl https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem -o /app/certs/rds-combined-ca-bundle.pem  && \
-    /opt/java/openjdk/bin/keytool -noprompt -import -trustcacerts -alias aws-rds -file /app/certs/rds-combined-ca-bundle.pem -keystore /etc/ssl/certs/java/cacerts -keypass changeit -storepass changeit && \
+    keytool -noprompt -import -trustcacerts -alias aws-rds -file /app/certs/rds-combined-ca-bundle.pem -keystore /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts -storepass changeit && \
     curl https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem -o /app/certs/DigiCertGlobalRootG2.crt.pem  && \
-    /opt/java/openjdk/bin/keytool -noprompt -import -trustcacerts -alias azure-cert -file /app/certs/DigiCertGlobalRootG2.crt.pem -keystore /etc/ssl/certs/java/cacerts -keypass changeit -storepass changeit && \
+    keytool -noprompt -import -trustcacerts -alias azure-cert -file /app/certs/DigiCertGlobalRootG2.crt.pem -keystore /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts -storepass changeit && \
     mkdir -p /plugins && chmod a+rwx /plugins
 
 # add Metabase script and uberjar
