@@ -8,7 +8,7 @@ ARG MB_EDITION=oss
 
 WORKDIR /home/node
 
-RUN apt-get update && apt-get upgrade -y && apt-get install curl git -y \
+RUN apt-get update && apt-get upgrade -y && apt-get install curl git unzip zip -y \
     && curl -O https://download.clojure.org/install/linux-install-1.11.1.1262.sh \
     && chmod +x linux-install-1.11.1.1262.sh \
     && ./linux-install-1.11.1.1262.sh
