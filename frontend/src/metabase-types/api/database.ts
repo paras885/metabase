@@ -1,4 +1,3 @@
-import { NativePermissions } from "./permissions";
 import { ScheduleSettings } from "./settings";
 import { Table } from "./table";
 import { ISO8601Time } from ".";
@@ -41,7 +40,7 @@ export interface Database extends DatabaseData {
   features: DatabaseFeature[];
   creator_id?: number;
   timezone?: string;
-  native_permissions: NativePermissions;
+  native_permissions: "write" | "none";
   initial_sync_status: InitialSyncStatus;
   caveats?: string;
   points_of_interest?: string;
@@ -88,8 +87,6 @@ export interface DatabaseQuery {
 
 export interface DatabaseListQuery {
   include?: "tables";
-  include_cards?: boolean;
-  include_tables?: boolean;
   saved?: boolean;
   include_editable_data_model?: boolean;
   exclude_uneditable_details?: boolean;

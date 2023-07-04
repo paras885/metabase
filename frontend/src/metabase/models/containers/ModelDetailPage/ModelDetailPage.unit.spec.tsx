@@ -76,6 +76,7 @@ const TEST_TABLE_ID = 1;
 const TEST_FIELD = createMockField({
   id: 1,
   display_name: "Field 1",
+  semantic_type: TYPE.PK,
   table_id: TEST_TABLE_ID,
 });
 
@@ -227,7 +228,7 @@ async function setup({
 
   setupCardsEndpoints([card]);
   setupModelActionsEndpoints(actions, model.id());
-  setupCollectionsEndpoints(collections);
+  setupCollectionsEndpoints({ collections });
 
   const name = model.displayName()?.toLowerCase();
   const slug = `${model.id()}-${name}`;
