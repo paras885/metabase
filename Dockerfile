@@ -2,28 +2,16 @@
 # STAGE 1: builder
 ###################
 
-FROM node:16-slim as builder
+FROM node:18-bullseye as builder
 
 ARG MB_EDITION=oss
 
 WORKDIR /home/node
 
-RUN apt-get update && apt-get upgrade -y && apt-get install curl git unzip zip -y \
+RUN apt-get update && apt-get upgrade -y && apt-get install openjdk-11-jdk curl git -y \
     && curl -O https://download.clojure.org/install/linux-install-1.11.1.1262.sh \
     && chmod +x linux-install-1.11.1.1262.sh \
     && ./linux-install-1.11.1.1262.sh
-
-# Install SDKMAN
-RUN curl -s "https://get.sdkman.io" | bash
-
-# Install Java 8 using SDKMAN
-RUN /bin/bash -c "source $HOME/.sdkman/bin/sdkman-init.sh; sdk install java 8.0.302-open"
-
-# Set JAVA_HOME environment variable
-ENV JAVA_HOME=/root/.sdkman/candidates/java/current
-
-# Add Java binaries to the PATH
-ENV PATH="$JAVA_HOME/bin:${PATH}"
 
 COPY . .
 
@@ -36,7 +24,11 @@ RUN INTERACTIVE=false CI=true MB_EDITION=$MB_EDITION bin/build.sh
 # # STAGE 2: runner
 # ###################
 
-FROM --platform=linux/amd64 eclipse-temurin:8-jre-alpine as runner
+## Remember that this runner image needs to be the same as bin/docker/Dockerfile with the exception that this one grabs the
+## jar from the previous stage rather than the local build
+## we're not yet there to provide an ARM runner till https://github.com/adoptium/adoptium/issues/96 is ready
+
+FROM --platform=linux/amd64 eclipse-temurin:11-jre-alpine as runner
 
 ENV FC_LANG en-US LC_CTYPE en_US.UTF-8
 
